@@ -10,8 +10,21 @@ def get_tweets_for_year(year):
     # matt
     pass
 
+def parse_tweets(tweets,regexp dictionary):
+    '''Take Tweet and seperate out id and text, search text for regexp, if match then add to dictionary'''
+    for tweet in tweets:
+        tweetid = tweet[0]
+        text = tweet[i]
+        match =  re.match(regexp, text).group(0)
+        if(match != None):
+            dictionary[tweetid] = match
+    return dictionary
+
+    
 def get_host(tweets):
     # rene
+    #regexp = 
+    
     pass
 
 def award_names(tweets):
