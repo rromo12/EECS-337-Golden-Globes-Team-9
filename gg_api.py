@@ -7,8 +7,12 @@ import re
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 
 def get_tweets_for_year(year):
-    # matt
-    pass
+    tweets = []
+    with open("gg%s.json" % year) as tweet_file:
+        json_object = json.load(tweet_file)
+        for tweet_object in json_object:
+            tweets.append((tweet_object["id"], tweet_object["text"]))
+    return tweets
 
 def parse_tweets(tweets,regexp dictionary):
     '''Take Tweet and seperate out id and text, search text for regexp, if match then add to dictionary'''
