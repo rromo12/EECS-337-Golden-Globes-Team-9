@@ -14,7 +14,7 @@ def get_tweets_for_year(year):
             tweets.append((tweet_object["id"], tweet_object["text"]))
     return tweets
 
-def parse_tweets(tweets,regexp dictionary):
+def parse_tweets(tweets, regexp, dictionary={}):
     '''Take Tweet and seperate out id and text, search text for regexp, if match then add to dictionary'''
     for tweet in tweets:
         tweetid = tweet[0]
@@ -32,9 +32,8 @@ def get_host(tweets):
     pass
 
 def award_names(tweets):
-    award_dictionary = {}
     award_regex = r"Best ([A-Z][a-z]+(?=\s[A-Z])(?:\s[A-Z][a-z]+)+)"
-    award_dictionary = parse_tweets(tweets, award_regex, award_dictionary)
+    award_dictionary = parse_tweets(tweets, award_regex)
     return award_dictionary
 
 def get_nominees(tweets):
