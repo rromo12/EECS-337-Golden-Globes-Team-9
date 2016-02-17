@@ -50,6 +50,27 @@ def get_winners(tweets):
     # rene
     pass
 
+#Tweet contains match for award and nomineee ---> add to lists
+#dictionary Hosts: {key:value} = tweetid: hostname 
+#dictionary Award Names: {key:value} = tweetid: awardname 
+#dictionary Nominees: {key:value} = tweetid: nominees 
+d_winners{};
+d_nominee{};
+d_award{};
+
+#d_winners_nominee{};
+d_nominee_award{};
+d_winner_award{};
+
+def match_IDs(d_winners, d_nominee, d_award):
+    for key_a, value_a in d_award:
+        for key_n, value_n in d_nominee:
+            if key_n == key_a:
+                d_nominee_award[value_n] = value_a;
+        for key_w, value_w in d_winners:
+            if key_w == key_a:
+                d_winner_award[value_w] = value_w;
+
 
 def get_hosts(year):
     '''Hosts is a list of one or more strings. Do NOT change the name
