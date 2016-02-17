@@ -3,6 +3,7 @@ import gzip
 import json
 import os
 import re
+import pickle 
 
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 
@@ -54,13 +55,13 @@ def get_winners(tweets):
 #dictionary Hosts: {key:value} = tweetid: hostname 
 #dictionary Award Names: {key:value} = tweetid: awardname 
 #dictionary Nominees: {key:value} = tweetid: nominees 
-d_winners{};
-d_nominee{};
-d_award{};
+# d_winners{};
+# d_nominee{};
+# d_award{};
 
 #d_winners_nominee{};
-d_nominee_award{};
-d_winner_award{};
+# d_nominee_award{};
+# d_winner_award{};
 
 def match_IDs(d_winners, d_nominee, d_award):
     for key_a, value_a in d_award:
@@ -146,6 +147,34 @@ def delete(file_name):
     os.remove(file_name)
     return
 
+def save(dObj, sFilename):
+  """Given an object and a file name, write the object to the file using pickle."""
+  f = open(sFilename, "w")
+  p = pickle.Pickler(f)
+  p.dump(dObj)
+  f.close()
+
+def load(sFilename):
+  """Given a file name, load and return the object stored in the file."""
+  f = open(sFilename, "r")
+  u = pickle.Unpickler(f)
+  dObj = u.load()
+  f.close()
+  return dObj
+
+
+def Make_IMDB_List(f):
+    c  = open(f,'rb').read()
+    List = re.split(r'\n{2,}', c)
+    exp = re.compile('^([A-z \-]*)(?:, ([A-z ]+\s?(?:\(I*\))?))\s{2,}([0-9A-z ]*)\s(\([0-9\/?I]*\))\s*(\[.*\])?$',re.M)#grabs line with name + first role
+    #grab first name and last name from this line possibly simplify and say lastname, firstname (ignoring any compound names or single names)
+    imdblists =[]
+    for index,item in enumerate(List):
+        match = re.match(exp, item)
+        if(match!= None):
+            imdblists.append(match.group(2) +  ' ' +match.group(1))
+    return imdblists
+
 def pre_ceremony():
     '''This function loads/fetches/processes any data your program
     will use, and stores that data in your DB or in a json, csv, or
@@ -153,12 +182,20 @@ def pre_ceremony():
     Do NOT change the name of this function or what it returns.'''
     # Your code here
     #get IMDB Actor,Actress,Nicknames, and Movie List
-    urls = ['ftp://ftp.fu-berlin.de/pub/misc/movies/database/actors.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/actresses.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/aka-names.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/movies.list.gz']
-    for url in urls:
-        file_name = url.split('/')[-1]
-        #download(url)
-        #extract(file_name)
-        #delete(file_name)
+    if (not(os.path.isfile("actors.lst")) and not(os.path.isfile("actresses.lst"))):
+        urls = ['ftp://ftp.fu-berlin.de/pub/misc/movies/database/actors.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/actresses.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/aka-names.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/movies.list.gz']
+        for url in urls:
+            file_name = url.split('/')[-1]
+            download(url)
+            extract(file_name)
+            delete(file_name)
+        lists  = ['actresses.list','actors.list']
+        actresses = Make_IMDB_List(lists[0])
+        actors = Make_IMDB_List(lists[1])
+        save(actors, 'actors.lst')
+        save(actresses, 'actresses.lst')
+        
+
     print "Pre-ceremony processing complete."
     return
 
@@ -169,16 +206,13 @@ def main():
     run when grading. Do NOT change the name of this function or
     what it returns.'''
     # Your code here
-    f  = 'actresses.list'
-    c  = open(f,'rb').read()
-    List = re.split(r'\n{2,}', c)
-    exp = re.compile('^(.*)$',re.M)#grabs line with name + first role
-    #grab first name and last name from this line possibly simplify and say lastname, firstname (ignoring any compound names or single names)
-    lists =[]
-    for index,item in enumerate(List):
-            List[index] = re.match(exp, item).group(0) #so far gets a name and
-    for item in List[2000:2100]:
-        print item
+    x = load('actors.lst')
+    y = load('actresses.lst')
+    for n in x[:1000]:
+        print n
+    for n in y[:1000]:
+        print n
+
     return
 
 if __name__ == '__main__':
