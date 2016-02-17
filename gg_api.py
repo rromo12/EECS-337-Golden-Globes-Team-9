@@ -18,10 +18,11 @@ def parse_tweets(tweets, regexp, dictionary={}):
     '''Take Tweet and seperate out id and text, search text for regexp, if match then add to dictionary'''
     for tweet in tweets:
         tweetid = tweet[0]
-        text = tweet[i]
-        match =  re.match(regexp, text).group(0)
+        text = tweet[1]
+        match =  re.match(regexp, text)
         if(match != None):
-            dictionary[tweetid] = match
+            extracted = match.group(0)
+            dictionary[tweetid] = extracted
     return dictionary
 
     
