@@ -19,6 +19,7 @@ def parse_tweets(tweets, regexp, dictionary={}):
     for tweet in tweets:
         tweetid = tweet[0]
         text = tweet[1]
+        ##maybe add stop list before matching
         match =  re.match(regexp, text)
         if(match != None):
             extracted = match.group(0)
@@ -27,9 +28,9 @@ def parse_tweets(tweets, regexp, dictionary={}):
 
     
 def get_host(tweets):
-    # rene
-    #regexp = 
-    
+    regexp = '(hosts? [A-z]* [A-z]*)'
+    host_dictionary = parse_tweets(tweets ,regexp)
+    return host_dictionary
     pass
 
 def award_names(tweets):
