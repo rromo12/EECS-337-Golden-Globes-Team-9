@@ -170,8 +170,7 @@ def load(sFilename):
 def Make_IMDB_List(f):
     c  = open(f,'rb').read()
     List = re.findall(r'\n{2,}(.*)', c)
-    exp = re.compile('([A-z \-]*)(?:,(( [A-z\-\.]*){0,3}(?:\(I*\))?))(.*)\s(\(.*\))\s*(\[.*\])?',re.M)#grabs line with name + first role
-    #grab first name and last name from this line possibly simplify and say lastname, firstname (ignoring any compound names or single names)
+    exp = re.compile('([A-z \-\.]*)(?:,(( [A-z\-\.]*){0,3}(?:\(I*\))?))(.*)\s(\(.*\))\s*(\[.*\])?',re.M)
     imdblists =[]
     for index,item in enumerate(List):
         match = re.match(exp, item)
@@ -215,20 +214,21 @@ def main():
     # for item in List:
     #     print item
     # Your code here
-    # x = load('actors.lst')
-    # y = load('actresses.lst')
-    # for n in x[:1000]:
-    #     print n
-    # for n in y[:1000]:
-    #     print n
-    # print len(x)
-    # print len(y)
-    # if('Tina Fey' in  y):
-    #     print True;
-    # if('Amy Poehler' in  y):
-    #     print True;
-    # if('Ricky Gervais' in x):
-    #     print True;
+    x = load('actors.lst')
+    y = load('actresses.lst')
+    for n in x[:1000]:
+        print n
+    for n in y[:1000]:
+        print n
+    print len(x)
+    print len(y)
+    #Test cases  Joseph Gordon-Levitt , Robert De Niro, 
+    if('Prince ' in  x):
+        print 'JG-L';
+    if('Robert De Niro' in  x):
+        print 'De Niro';
+    if('Robert Downey Jr.' in x):
+        print 'RDJ';
     # tweets = get_tweets_for_year(2013)
     # x=award_names(tweets)
     # for keys,values in x.items():
