@@ -4,8 +4,13 @@ import json
 import os
 import re
 import pickle 
+import nltk
+from nltk.util import everygrams
+from nltk.util import ngrams
+from nltk.tokenize import TweetTokenizer
 
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
+
 
 def get_tweets_for_year(year):
     tweets = []
@@ -27,13 +32,23 @@ def parse_tweets(tweets, regexp, dictionary={}):
             dictionary[tweetid] = extracted
     return dictionary
 
-def get_names(tweet):
-    #get bigrams in tweet, compare them to list of actors and actresses 
-    #if any matches return a dict[tweetid] = [Name1, Name2,Name3]
-    pass
+def get_names(tweet,nameset,max_tokens):
+    #get ngrams in tweet, compare them to list of actors and actressss 
+    # Need to fix 
+    names= []
+    tweetid = tweet[0]
+    text = tweet[1]
+    grams = nltk.word_tokenize(text)
+    # use stop list to limit grams
+    tweet_ngrams = everygrams(grams, min_len=1, max_len=max_tokens)
+    for gram in tweet_ngrams:
+            name = ' '.join(gram)
+            if(name in nameset):
+                names.append(name)
+    return names
     
-def get_host(tweets):
-    regexp = '(hosts?\s[A-z]*\s[A-z]*)'
+def get_host_dictionary(tweets):
+    regexp = '(host(s?|ing)\s)'
     host_dictionary = parse_tweets(tweets ,regexp)
     return host_dictionary
     pass
@@ -43,15 +58,15 @@ def award_names(tweets):
     award_dictionary = parse_tweets(tweets, award_regex)
     return award_dictionary
 
-def get_nominees(tweets):
+def get_nominees_dictionary(tweets):
     # rene
     pass
 
-def get_presenters(tweets):
+def get_presenters_dictionary(tweets):
     # rene
     pass
 
-def get_winners(tweets):
+def get_winners_dictionary(tweets):
     # rene
     pass
 
@@ -170,7 +185,7 @@ def load(sFilename):
 def Make_IMDB_List(f):
     c  = open(f,'rb').read()
     List = re.findall(r'\n{2,}(.*)', c)
-    exp = re.compile('([A-z \-\.]*)(?:,(( [A-z\-\.]*){0,3}(?:\(I*\))?))(.*)\s(\(.*\))\s*(\[.*\])?',re.M)
+    exp = re.compile('([A-z \-\.]*)(?:,(( [A-z\-\.]*){0,3})(?:\(I*\))?)(.*)\s(\(.*\))\s*(\[.*\])?',re.M)
     imdblists =[]
     for index,item in enumerate(List):
         match = re.match(exp, item)
@@ -195,10 +210,13 @@ def pre_ceremony():
         lists  = ['actresses.list','actors.list']
         actresses = Make_IMDB_List(lists[0])
         actors = Make_IMDB_List(lists[1])
+        actors = set(actors)
+        actresses =set (actresses)
         #movie list
         #nick nameslist
         save(actors, 'actors.lst')
         save(actresses, 'actresses.lst')
+
     print "Pre-ceremony processing complete."
     return
 
@@ -208,34 +226,34 @@ def main():
     and then run gg_api.main(). This is the second thing the TA will
     run when grading. Do NOT change the name of this function or
     what it returns.'''
-    # f = 'actresses.list'
-    # c  = open(f,'rb').read()
-    # List = re.findall(r'\n{2,}(.*)', c)
-    # for item in List:
-    #     print item
+
     # Your code here
-    x = load('actors.lst')
-    y = load('actresses.lst')
-    for n in x[:1000]:
-        print n
-    for n in y[:1000]:
-        print n
-    print len(x)
-    print len(y)
-    #Test cases  Joseph Gordon-Levitt , Robert De Niro, 
-    if('Prince ' in  x):
-        print 'JG-L';
-    if('Robert De Niro' in  x):
-        print 'De Niro';
-    if('Robert Downey Jr.' in x):
-        print 'RDJ';
+    # max_tokens = 4;
+    # print 'loading lists'
+    # x = load('actors.lst')
+    # y = load('actresses.lst')
+    # print 'Lists loaded'
+    # # for item in x:
+    # #         print nltk.tokenize()
+    # # for n in x[:1000]:
+    #     # print n
+    # # for n in y[:1000]:
+    #     # print n
+    # # print len(x)
+    # # print len(y)
+    # # if('Ricky Gervais' in x):
+    #     # print True
     # tweets = get_tweets_for_year(2013)
-    # x=award_names(tweets)
-    # for keys,values in x.items():
-    #     print(keys)
-    #     print(values)
-    # return
+    # print len(tweets)
+    # actor_names = []
+    # for tweet in tweets:
+    #     anames = get_names(tweet,x,max_tokens)
+    #     if (anames != []):
+    #         actor_names.append(anames)
+    #         print anames
+    #     print tweet
 
 if __name__ == '__main__':
     pre_ceremony()
     main()
+
