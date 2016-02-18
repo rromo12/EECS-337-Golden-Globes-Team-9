@@ -39,7 +39,7 @@ def get_host(tweets):
     pass
 
 def award_names(tweets):
-    award_regex = r"(Best(?=\s[A-Z])(?:\s([A-Z]\w+|in|a))+)"
+    award_regex = r"(Best(?=\s[A-Z])(?:\s([A-Z]\w+|in|a|by an|\s-\s))+)"
     award_dictionary = parse_tweets(tweets, award_regex)
     return award_dictionary
 
