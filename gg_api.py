@@ -4,7 +4,6 @@ import json
 import os
 import re
 import pickle 
-<<<<<<< HEAD
 import nltk
 from nltk.util import everygrams
 from nltk.util import ngrams
