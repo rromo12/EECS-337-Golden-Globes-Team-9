@@ -21,12 +21,16 @@ def parse_tweets(tweets, regexp, dictionary={}):
         tweetid = tweet[0]
         text = tweet[1]
         ##maybe add stop list before matching
-        match =  re.match(regexp, text)
+        match =  re.search(regexp, text)
         if(match != None):
             extracted = match.group(0)
             dictionary[tweetid] = extracted
     return dictionary
 
+def get_names(tweet):
+    #get bigrams in tweet, compare them to list of actors and actresses 
+    #if any matches return a dict[tweetid] = [Name1, Name2,Name3]
+    pass
     
 def get_host(tweets):
     regexp = '(hosts?\s[A-z]*\s[A-z]*)'
@@ -192,6 +196,8 @@ def pre_ceremony():
         lists  = ['actresses.list','actors.list']
         actresses = Make_IMDB_List(lists[0])
         actors = Make_IMDB_List(lists[1])
+        #movie list
+        #nick nameslist
         save(actors, 'actors.lst')
         save(actresses, 'actresses.lst')
     print "Pre-ceremony processing complete."
@@ -209,7 +215,20 @@ def main():
     # for item in List:
     #     print item
     # Your code here
-    
+    # x = load('actors.lst')
+    # y = load('actresses.lst')
+    # for n in x[:1000]:
+    #     print n
+    # for n in y[:1000]:
+    #     print n
+    # print len(x)
+    # print len(y)
+    # if('Tina Fey' in  y):
+    #     print True;
+    # if('Amy Poehler' in  y):
+    #     print True;
+    # if('Ricky Gervais' in x):
+    #     print True;
     # tweets = get_tweets_for_year(2013)
     # x=award_names(tweets)
     # for keys,values in x.items():
