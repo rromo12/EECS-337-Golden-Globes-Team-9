@@ -4,10 +4,15 @@ import json
 import os
 import re
 import pickle 
+<<<<<<< HEAD
 import nltk
 from nltk.util import everygrams
 from nltk.util import ngrams
 from nltk.tokenize import TweetTokenizer
+=======
+from collections import Counter
+from fuzzywuzzy import process, fuzz
+>>>>>>> origin/master
 
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 
@@ -54,7 +59,7 @@ def get_host_dictionary(tweets):
     pass
 
 def award_names(tweets):
-    award_regex = r"(Best(?=\s[A-Z])(?:\s([A-Z]\w+|in|a))+)"
+    award_regex = r"(Best(?=\s[A-Z])(?:\s([A-Z]\w+|in|a|by an|\s-\s))+)"
     award_dictionary = parse_tweets(tweets, award_regex)
     return award_dictionary
 
@@ -69,6 +74,26 @@ def get_presenters_dictionary(tweets):
 def get_winners_dictionary(tweets):
     # rene
     pass
+
+def get_master_award(found_awards, cutoff=25):
+    frequent_appearing_awards = [found_award for found_award in found_awards if found_awards.count(found_award) > 5]
+    unique_award_names = set(frequent_appearing_awards)
+    print unique_award_names
+    found_award_counts = Counter(frequent_appearing_awards)
+    top_awards = [a[0] for a in found_award_counts.most_common(cutoff)]
+    print top_awards
+    ordered_by_count = [i[0] for i in found_award_counts.most_common()[::-1]]
+    for award in ordered_by_count:
+        best_match = process.extractOne(award, ordered_by_count[ordered_by_count.index(award)+1:], scorer=fuzz.token_sort_ratio, score_cutoff=85)
+        if best_match:
+            if award not in top_awards:
+                print award, best_match
+                unique_award_names.remove(award)
+
+    return unique_award_names
+
+
+
 
 #Tweet contains match for award and nomineee ---> add to lists
 #dictionary Hosts: {key:value} = tweetid: hostname 
