@@ -89,6 +89,12 @@ def get_master_award(found_awards, cutoff=25):
 
     return unique_award_names
 
+def convert_awards_to_given_names(found_awards):
+    converted_dict = {}
+    for tweet_id in found_awards.keys():
+        converted_dict[tweet_id] = process.extractOne(found_awards[tweet_id], OFFICIAL_AWARDS)[0]
+    return converted_dict
+
 
 
 
