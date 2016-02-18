@@ -29,7 +29,7 @@ def parse_tweets(tweets, regexp, dictionary={}):
 
     
 def get_host(tweets):
-    regexp = '(hosts? [A-z]* [A-z]*)'
+    regexp = '(hosts?\s[A-z]*\s[A-z]*)'
     host_dictionary = parse_tweets(tweets ,regexp)
     return host_dictionary
     pass
@@ -165,14 +165,14 @@ def load(sFilename):
 
 def Make_IMDB_List(f):
     c  = open(f,'rb').read()
-    List = re.split(r'\n{2,}', c)
-    exp = re.compile('^([A-z \-]*)(?:, ([A-z ]+\s?(?:\(I*\))?))\s{2,}([0-9A-z ]*)\s(\([0-9\/?I]*\))\s*(\[.*\])?$',re.M)#grabs line with name + first role
+    List = re.findall(r'\n{2,}(.*)', c)
+    exp = re.compile('([A-z \-]*)(?:,(( [A-z\-\.]*){0,3}(?:\(I*\))?))(.*)\s(\(.*\))\s*(\[.*\])?',re.M)#grabs line with name + first role
     #grab first name and last name from this line possibly simplify and say lastname, firstname (ignoring any compound names or single names)
     imdblists =[]
     for index,item in enumerate(List):
         match = re.match(exp, item)
         if(match!= None):
-            imdblists.append(match.group(2) +  ' ' +match.group(1))
+            imdblists.append(match.group(2).strip() +  ' ' +match.group(1).strip())
     return imdblists
 
 def pre_ceremony():
@@ -194,8 +194,6 @@ def pre_ceremony():
         actors = Make_IMDB_List(lists[1])
         save(actors, 'actors.lst')
         save(actresses, 'actresses.lst')
-        
-
     print "Pre-ceremony processing complete."
     return
 
@@ -205,15 +203,19 @@ def main():
     and then run gg_api.main(). This is the second thing the TA will
     run when grading. Do NOT change the name of this function or
     what it returns.'''
+    # f = 'actresses.list'
+    # c  = open(f,'rb').read()
+    # List = re.findall(r'\n{2,}(.*)', c)
+    # for item in List:
+    #     print item
     # Your code here
-    x = load('actors.lst')
-    y = load('actresses.lst')
-    for n in x[:1000]:
-        print n
-    for n in y[:1000]:
-        print n
-
-    return
+    
+    # tweets = get_tweets_for_year(2013)
+    # x=award_names(tweets)
+    # for keys,values in x.items():
+    #     print(keys)
+    #     print(values)
+    # return
 
 if __name__ == '__main__':
     pre_ceremony()
