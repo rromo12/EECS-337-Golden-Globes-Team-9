@@ -64,6 +64,8 @@ def get_names(tweet,nameset):
             if(string in nameset):
                 names.append(string)
     return names
+
+##Tweet Filtering Functions     
     
 def get_host_tweets(tweets):
     ##find tweets relating to hosts
@@ -90,6 +92,7 @@ def get_winner_tweets(tweets):
     return winner_tweets
 
 def get_nominee_tweets(tweets):
+    # find tweets relating to nomination
     regexp = re.compile('(should(\'ve| have)\s)')
     host_tweets = filter_tweets(host_tweets,regexp)
     #find of tweets which have "should, should've"    
@@ -106,26 +109,18 @@ def get_presenter_tweets(tweets):
     host_tweets = filter_tweets(host_tweets,regexp)
     ##filter out 
 
+
+##Tweet Dictionary Functions dict[tweetid] = names 
 def award_names(tweets):
     award_regex = r"(Best(?=\s[A-Z])(?:\s([A-Z]\w+|in|a|by an|\s-\s))+)"
     award_dictionary = parse_tweets(tweets, award_regex)
     return award_dictionary
 
-def get_nominees_dictionary(tweets):
-    # rene
-    pass
-
-def get_presenters_dictionary(tweets):
-    # rene
-    pass
-
-def get_winners_dictionary(tweets):
+def make_dictionary(function,tweets):
     # TODO add movies_set and nicknames_set
     dictionary = defaultdict(list)
-    # print 'parsing tweets'
-    winner_tweets = get_winner_tweets(tweets)
-    # print 'extracting names'
-    for tweet in winner_tweets:
+    list_tweets = function(tweets)
+    for tweet in list_tweets:
         tweetid = tweet[0];
         if (get_names(tweet,actors_set)!= []):
                 dictionary[tweetid].extend(get_names(tweet,actors_set))
@@ -135,6 +130,17 @@ def get_winners_dictionary(tweets):
         #          dictionary[tweetid].extend(get_names(tweet,movies_set))
     # print 'names extracted'
     return dictionary
+
+def get_winners_dictionary(tweets):
+    return make_dictionary(get_winner_tweets,tweets)
+
+def get_nominees_dictionary(tweets):
+    return make_dictionary(get_nominee_tweets,tweets)
+
+def get_presenters_dictionary(tweets):
+    return make_dictionary(get_presenter_tweets,tweets)
+
+
 
 def get_master_award(found_awards, cutoff=25):
     frequent_appearing_awards = [found_award for found_award in found_awards if found_awards.count(found_award) > 5]
@@ -195,7 +201,10 @@ def get_hosts(year):
         if (get_names(tweet,actresses_set,4)!= []):
                 names.extend(get_names(tweet,actresses_set,4))
     hosts = Counter(names).most_common(2)
-    hosts = [hosts[0][0], hosts[1][0]]
+    if(cohost):
+        hosts = [hosts[0][0], hosts[1][0]]
+    else:
+        hosts = [hosts[0][0]]
     return hosts
 
 def get_awards(year):
@@ -324,7 +333,9 @@ def pre_ceremony():
 
 def onLoad():
     '''if we get a gui stuff to do before it shows'''
-    global actors_set,actresses_set,movies_set,max_tokens
+    global actors_set,actresses_set,movies_set,max_tokens cohost
+    #temp var until we can implement a way to decide whether the event was cohosted or not
+    cohost = True
     # load sets 
     max_tokens = 4; #Max number of tokens in a name i.e. Robert De Niro has 3 
     actors_set = load('actors.set')
@@ -344,8 +355,7 @@ def main():
     print 'Lists Loaded'
     # print get_hosts(2013)
     tweets = get_tweets_for_year(2015)
-    d = get_winners_dictionary(tweets)
-    print len(d)
+    x = get_hosts(2015)
     print 'done'
 
 
