@@ -68,15 +68,28 @@ def get_names(tweet,nameset):
 ##Tweet Filtering Functions     
     
 def get_host_tweets(tweets):
+    global cohost
     ##find tweets relating to hosts
     regexp = re.compile('(host(ed|ing)\s)')
     host_tweets = filter_tweets(tweets,regexp)
+    num_host_tweets = len(host_tweets)
+    cohost_tweets = host_tweets
     #get rid of tweets which have "should, should've"
     regexp = re.compile('(should(\'ve| have)\s)')
     host_tweets = filter_tweets(host_tweets,regexp,False)
     #get rid of tweets which have next year 
     regexp = re.compile('next year', re.I)
     host_tweets = filter_tweets(host_tweets,regexp,False)
+    ####Additional Basic Logic to Figure out if Cohost or not narrow down to cohost tweets (theoretically should but both test years have cohosts)
+    regexp = re.compile('and', re.I)
+    cohost_tweets = filter_tweets(cohost_tweets,regexp)
+    num_cohost_tweets = len(cohost_tweets)
+    num_host_tweets = num_host_tweets-num_cohost_tweets
+    if(num_cohost_tweets>num_host_tweets):
+        cohost = True
+    else:
+        cohost = False
+
     return host_tweets
 
 def get_winner_tweets(tweets):
@@ -194,10 +207,10 @@ def get_hosts(year):
     host_tweets = get_host_tweets(tweets)
     names = []
     for tweet in host_tweets:
-        if (get_names(tweet,actors_set,4)!= []):
-                names.extend(get_names(tweet,actors_set,4))
-        if (get_names(tweet,actresses_set,4)!= []):
-                names.extend(get_names(tweet,actresses_set,4))
+        if (get_names(tweet,actors_set)!= []):
+                names.extend(get_names(tweet,actors_set))
+        if (get_names(tweet,actresses_set)!= []):
+                names.extend(get_names(tweet,actresses_set))
     hosts = Counter(names).most_common(2)
     if(cohost):
         hosts = [hosts[0][0], hosts[1][0]]
@@ -331,9 +344,7 @@ def pre_ceremony():
 
 def onLoad():
     '''if we get a gui stuff to do before it shows'''
-    global actors_set,actresses_set,movies_set,max_tokens cohost
-    #temp var until we can implement a way to decide whether the event was cohosted or not
-    cohost = True
+    global actors_set,actresses_set,movies_set,max_tokens
     # load sets 
     max_tokens = 4; #Max number of tokens in a name i.e. Robert De Niro has 3 
     actors_set = load('actors.set')
@@ -347,12 +358,11 @@ def main():
     run when grading. Do NOT change the name of this function or
     what it returns.'''
     # Your code here
-    global actors_set,actresses_set,movies_set,max_tokens
     print 'Loading Lists'
     onLoad()
     print 'Lists Loaded'
     # print get_hosts(2013)
-    tweets = get_tweets_for_year(2015)
+    # tweets = get_tweets_for_year(2015)
     x = get_hosts(2015)
     print 'done'
 
