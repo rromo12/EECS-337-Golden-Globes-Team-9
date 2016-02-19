@@ -47,6 +47,7 @@ Temporary Items
 .apdisk
 *.list
 *.lst
+*.set
 gg2015.json
 *.list
 gg2013.json

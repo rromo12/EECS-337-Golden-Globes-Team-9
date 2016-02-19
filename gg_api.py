@@ -9,7 +9,7 @@ from nltk.util import everygrams
 from nltk.util import ngrams
 from nltk.tokenize import TweetTokenizer
 from collections import Counter
-from fuzzywuzzy import process, fuzz
+# from fuzzywuzzy import process, fuzz
 
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 
@@ -34,26 +34,51 @@ def parse_tweets(tweets, regexp, dictionary={}):
             dictionary[tweetid] = extracted
     return dictionary
 
+def filter_tweets(tweets, regexp,related=True):
+    '''Take Tweet and seperate out id and text, search text for regexp, if match then add to list, return list'''
+    tweet_list =[]
+    for tweet in tweets:
+        tweetid = tweet[0]
+        text = tweet[1]
+        ##maybe add stop list before matching
+        match =  re.search(regexp, text)
+        if(related):
+            if(match != None):
+                 tweet_list.append(tweet)
+        else:
+            if(match == None):
+                 tweet_list.append(tweet)
+
+    return tweet_list
+
+
 def get_names(tweet,nameset,max_tokens):
     #get ngrams in tweet, compare them to list of actors and actressss 
     # Need to fix 
     names= []
     tweetid = tweet[0]
     text = tweet[1]
-    grams = nltk.word_tokenize(text)
+    text = re.sub('\s',' ', text)
+    concurrent_capitalized_words = set(re.findall('([A-Z][a-z]+(?=\s[A-Z])(?:\s[A-Z][a-z]+)+)',text))
+    # grams = nltk.word_tokenize(concurrent_capitalized_words)
     # use stop list to limit grams
-    tweet_ngrams = everygrams(grams, min_len=1, max_len=max_tokens)
-    for gram in tweet_ngrams:
-            name = ' '.join(gram)
-            if(name in nameset):
-                names.append(name)
+    # tweet_ngrams = everygrams(grams, min_len=1, max_len=max_tokens)
+    for string in concurrent_capitalized_words:
+            if(string in nameset):
+                names.append(string)
     return names
     
-def get_host_dictionary(tweets):
-    regexp = '(host(s?|ing)\s)'
-    host_dictionary = parse_tweets(tweets ,regexp)
-    return host_dictionary
-    pass
+def get_host_tweets(tweets):
+    ##find tweets relating to hosts
+    regexp = re.compile('(host(ed|ing)\s)')
+    host_tweets = filter_tweets(tweets,regexp)
+    #get rid of tweets which have "should, should've"
+    regexp = re.compile('(should(\'ve| have)\s)')
+    host_tweets = filter_tweets(host_tweets,regexp,False)
+    regexp = re.compile('next year', re.I)
+    #get rid of tweets which have next year 
+    host_tweets = filter_tweets(host_tweets,regexp,False)
+    return host_tweets
 
 def award_names(tweets):
     award_regex = r"(Best(?=\s[A-Z])(?:\s([A-Z]\w+|in|a|by an|\s-\s))+)"
@@ -117,7 +142,16 @@ def match_IDs(d_winners, d_nominee, d_award):
 def get_hosts(year):
     '''Hosts is a list of one or more strings. Do NOT change the name
     of this function or what it returns.'''
-    # Your code here
+    tweets = get_tweets_for_year(year)
+    host_tweets = get_host_tweets(tweets)
+    names = []
+    for tweet in host_tweets:
+        if (get_names(tweet,actors_set,4)!= []):
+                names.extend(get_names(tweet,actors_set,4))
+        if (get_names(tweet,actresses_set,4)!= []):
+                names.extend(get_names(tweet,actresses_set,4))
+    hosts = Counter(names).most_common(2)
+    hosts = [hosts[0][0], hosts[1][0]]
     return hosts
 
 def get_awards(year):
@@ -222,7 +256,7 @@ def pre_ceremony():
     Do NOT change the name of this function or what it returns.'''
     # Your code here
     #get IMDB Actor,Actress,Nicknames, and Movie List
-    if (not(os.path.isfile("actors.lst")) and not(os.path.isfile("actresses.lst"))):
+    if (not(os.path.isfile("actors.set")) and not(os.path.isfile("actresses.set"))):
         urls = ['ftp://ftp.fu-berlin.de/pub/misc/movies/database/actors.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/actresses.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/aka-names.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/movies.list.gz']
         for url in urls:
             file_name = url.split('/')[-1]
@@ -234,13 +268,21 @@ def pre_ceremony():
         actors = Make_IMDB_List(lists[1])
         actors = set(actors)
         actresses =set (actresses)
+        delete(lists[0])
+        delete(lists[1])
         #movie list
         #nick nameslist
-        save(actors, 'actors.lst')
-        save(actresses, 'actresses.lst')
+        save(actors, 'actors.set')
+        save(actresses, 'actresses.set')
 
     print "Pre-ceremony processing complete."
     return
+
+def onLoad():
+    # load sets 
+
+    pass
+
 
 def main():
     '''This function calls your program. Typing "python gg_api.py"
@@ -248,32 +290,22 @@ def main():
     and then run gg_api.main(). This is the second thing the TA will
     run when grading. Do NOT change the name of this function or
     what it returns.'''
-
+    global actors_set,actresses_set,movies_set
     # Your code here
     # max_tokens = 4;
-    # print 'loading lists'
-    # x = load('actors.lst')
-    # y = load('actresses.lst')
-    # print 'Lists loaded'
-    # # for item in x:
-    # #         print nltk.tokenize()
-    # # for n in x[:1000]:
-    #     # print n
-    # # for n in y[:1000]:
-    #     # print n
-    # # print len(x)
-    # # print len(y)
-    # # if('Ricky Gervais' in x):
-    #     # print True
+    print 'Loading Lists'
+    actors_set = load('actors.set')
+    actresses_set = load('actresses.set')
+    print 'Lists Loaded'
     # tweets = get_tweets_for_year(2013)
     # print len(tweets)
     # actor_names = []
     # for tweet in tweets:
     #     anames = get_names(tweet,x,max_tokens)
-    #     if (anames != []):
-    #         actor_names.append(anames)
-    #         print anames
-    #     print tweet
+    # print 'Done'
+    print get_hosts(2013)
+
+
 
 if __name__ == '__main__':
     pre_ceremony()
