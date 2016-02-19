@@ -90,24 +90,22 @@ def get_winner_tweets(tweets):
     regexp = re.compile('(will|going to)')
     winner_tweets = filter_tweets(winner_tweets,regexp,False)
     return winner_tweets
-
+###############TODO Probably Need Better Regex for nominees and presenters
 def get_nominee_tweets(tweets):
     # find tweets relating to nomination
-    regexp = re.compile('(should(\'ve| have)\s)')
-    host_tweets = filter_tweets(host_tweets,regexp)
-    #find of tweets which have "should, should've"    
-    regexp = re.compile('(should(\'ve| have)\s)')
-    host_tweets = filter_tweets(host_tweets,regexp)
+    regexp = re.compile('nomin((?:(?:at(?:ed|ion)))|ee)')
+    nominee_tweets = filter_tweets(host_tweets,regexp)
     ##find tweets relating to winning?
-    
-
-    pass
+    return nominee_tweets
 
 def get_presenter_tweets(tweets):
     #find of tweets which have to do with presenting
-    regexp = re.compile('presenting')
-    host_tweets = filter_tweets(host_tweets,regexp)
+    regexp = re.compile('present(e(d|rs?)|ing)')
+    presenter_tweets = filter_tweets(host_tweets,regexp)
+    #narrow down
     ##filter out 
+    return presenter_tweets
+
 
 
 ##Tweet Dictionary Functions dict[tweetid] = names 
