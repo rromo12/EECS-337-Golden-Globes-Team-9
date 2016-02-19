@@ -119,3 +119,6 @@ target/
 
 #Ipython Notebook
 .ipynb_checkpoints
+*.set
+*.set
+actresses.set
