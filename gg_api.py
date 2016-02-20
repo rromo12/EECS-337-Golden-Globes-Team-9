@@ -153,8 +153,8 @@ def make_dictionary(function,tweets):
                 dictionary[tweetid].extend(get_people_names(tweet,actors_set))
         if (get_people_names(tweet,actresses_set)!= []):
                 dictionary[tweetid].extend(get_people_names(tweet,actresses_set))
-       # if(get_movie_names(tweet,movies_set)!=[]):
-       #         dictionary[tweetid].extend(get_movie_names(tweet,movies_set))
+        if(get_movie_tv_names(tweet)!=[]):
+                dictionary[tweetid].extend(get_movie_tv_names(tweet))
     return dictionary
 
 def get_winners_dictionary(tweets):
@@ -365,13 +365,21 @@ def pre_ceremony():
 
 def onLoad():
     '''if we get a gui stuff to do before it shows'''
-    global actors_set,actresses_set,movies_set,max_tokens
+    global actors_set,actresses_set,movies_set,max_tokens,tweets2015,tweets2013
     # load sets 
     max_tokens = 4; #Max number of tokens in a name i.e. Robert De Niro has 3 
     actors_set = load('actors.set')
     actresses_set = load('actresses.set')
     movies_set = load('movies.set')
-
+    #######Optionally create dictionaries on load
+    # tweets2015 = get_tweets_for_year(2015)
+    # winners_2015  = get_winners_dictionary(tweets2015)
+    # nominees_2015 = get_nominees_dictionary(tweets2015)
+    # presenters_2015 = get_presenters_dictionary(tweets2015)
+    # tweets2013 = get_tweets_for_year(2013)
+    # winners_2013  = get_winners_dictionary(tweets2013)
+    # nominees_2013 = get_nominees_dictionary(tweets2013)
+    # presenters_2013 = get_presenters_dictionary(tweets2013)
 
 def main():
     '''This function calls your program. Typing "python gg_api.py"
@@ -383,17 +391,10 @@ def main():
     print 'Loading Lists'
     onLoad()
     print 'Lists Loaded'
-    # x = get_hosts(2015)
-    y=[]
-    tweets = get_tweets_for_year(2015)
-    for tweet in tweets:
-        y.extend(get_movie_tv_names(tweet))
-
-    print Counter(y).most_common(100)
-        
+    x = get_hosts(2015)
+    
     # get_winners_dictionary(tweets)
     # get_nominees_dictionary(tweets)
-    # (([A-Z]|[0-9])(\w|[\'\-\.\:\,\/\*\!\?])*)
     # get_presenters_dictionary(tweets)
 
     
