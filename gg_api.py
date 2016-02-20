@@ -5,6 +5,7 @@ import os
 import re
 import pickle 
 import nltk
+import time
 from collections import Counter
 from collections import defaultdict
 # from fuzzywuzzy import process, fuzz
@@ -49,7 +50,7 @@ def filter_tweets(tweets, regexp,related=True):
 
     return tweet_list
 
-def get_names(tweet,nameset):
+def get_people_names(tweet,nameset):
     #get ngrams in tweet, compare them to list of actors and actressss 
     # Need to fix 
     names= []
@@ -65,8 +66,20 @@ def get_names(tweet,nameset):
                 names.append(string)
     return names
 
-##Tweet Filtering Functions     
-    
+def get_movie_names(tweet,movieset):
+    #get ngrams in tweet, compare them to list of actors and actressss 
+    # Need to fix 
+    names= []
+    tweetid = tweet[0]
+    text = tweet[1]
+    ####RegEX
+    possible_movie_names = set(re.findall('(((?:(?:(?:(?:[A-Z]|[0-9])((\w*)?([,:\'.!-/]*)?(:?\w*)?)?)|A|I)\s?)+)((?:(?:(?:&|(?:i|o)n|of|a(?:s|nd|n|t)?|(?:d|l)e|f?or|vs\.|to|by|la|the|with|du) )){1,2})?)+',text))
+    for string in possible_movie_names:
+            if(string in movieset):
+                names.append(string)
+    return names
+
+##Tweet Filtering Functions       
 def get_host_tweets(tweets):
     global cohost
     ##find tweets relating to hosts
@@ -107,14 +120,14 @@ def get_winner_tweets(tweets):
 def get_nominee_tweets(tweets):
     # find tweets relating to nomination
     regexp = re.compile('nomin((?:(?:at(?:ed|ion)))|ee)')
-    nominee_tweets = filter_tweets(host_tweets,regexp)
+    nominee_tweets = filter_tweets(tweets,regexp)
     ##find tweets relating to winning?
     return nominee_tweets
 
 def get_presenter_tweets(tweets):
     #find of tweets which have to do with presenting
     regexp = re.compile('present(e(d|rs?)|ing)')
-    presenter_tweets = filter_tweets(host_tweets,regexp)
+    presenter_tweets = filter_tweets(tweets,regexp)
     #narrow down
     ##filter out 
     return presenter_tweets
@@ -133,13 +146,12 @@ def make_dictionary(function,tweets):
     list_tweets = function(tweets)
     for tweet in list_tweets:
         tweetid = tweet[0];
-        if (get_names(tweet,actors_set)!= []):
-                dictionary[tweetid].extend(get_names(tweet,actors_set))
-        if (get_names(tweet,actresses_set)!= []):
-                dictionary[tweetid].extend(get_names(tweet,actresses_set))
-        # if(get_names(tweet,movies_set)!=[]):
-        #          dictionary[tweetid].extend(get_names(tweet,movies_set))
-    # print 'names extracted'
+        if (get_people_names(tweet,actors_set)!= []):
+                dictionary[tweetid].extend(get_people_names(tweet,actors_set))
+        if (get_people_names(tweet,actresses_set)!= []):
+                dictionary[tweetid].extend(get_people_names(tweet,actresses_set))
+       # if(get_movie_names(tweet,movies_set)!=[]):
+       #         dictionary[tweetid].extend(get_movie_names(tweet,movies_set))
     return dictionary
 
 def get_winners_dictionary(tweets):
@@ -207,10 +219,10 @@ def get_hosts(year):
     host_tweets = get_host_tweets(tweets)
     names = []
     for tweet in host_tweets:
-        if (get_names(tweet,actors_set)!= []):
-                names.extend(get_names(tweet,actors_set))
-        if (get_names(tweet,actresses_set)!= []):
-                names.extend(get_names(tweet,actresses_set))
+        if (get_people_names(tweet,actors_set)!= []):
+                names.extend(get_people_names(tweet,actors_set))
+        if (get_people_names(tweet,actresses_set)!= []):
+                names.extend(get_people_names(tweet,actresses_set))
     hosts = Counter(names).most_common(2)
     if(cohost):
         hosts = [hosts[0][0], hosts[1][0]]
@@ -301,8 +313,7 @@ def load(sFilename):
   f.close()
   return dObj
 
-
-def Make_IMDB_List(f):
+def Make_IMDB_People_List(f):
     c  = open(f,'rb').read()
     List = re.findall(r'\n{2,}(.*)', c)
     exp = re.compile('([A-z \-\.]*)(?:,(( [A-z\-\.]*){0,3})(?:\(I*\))?)(.*)\s(\(.*\))\s*(\[.*\])?',re.M)
@@ -313,6 +324,13 @@ def Make_IMDB_List(f):
             imdblists.append(match.group(2).strip() +  ' ' +match.group(1).strip())
     return imdblists
 
+def Make_IMDB_Movie_List(f):
+    c  = open(f,'rb').read()
+    exp = re.compile('(.*)\([0-9]*\)',re.M)
+    List = re.findall(exp, c)
+    List =set(List)
+    return List
+
 def pre_ceremony():
     '''This function loads/fetches/processes any data your program
     will use, and stores that data in your DB or in a json, csv, or
@@ -320,25 +338,25 @@ def pre_ceremony():
     Do NOT change the name of this function or what it returns.'''
     # Your code here
     #get IMDB Actor,Actress,Nicknames, and Movie List
-    if (not(os.path.isfile("actors.set")) and not(os.path.isfile("actresses.set"))):
+    if not((os.path.isfile("actors.set")) and os.path.isfile("actresses.set") and os.path.isfile("movies.set")):
         urls = ['ftp://ftp.fu-berlin.de/pub/misc/movies/database/actors.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/actresses.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/aka-names.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/movies.list.gz']
         for url in urls:
             file_name = url.split('/')[-1]
             download(url)
             extract(file_name)
             delete(file_name)
-        lists  = ['actresses.list','actors.list']
-        actresses = Make_IMDB_List(lists[0])
-        actors = Make_IMDB_List(lists[1])
-        actors = set(actors)
-        actresses =set (actresses)
+        lists  = ['actresses.list','actors.list','movies.list']
+        actresses = set(Make_IMDB_People_List(lists[0]))
+        actors = set(Make_IMDB_People_List(lists[1]))
+        movies = Make_IMDB_Movie_List(lists[2])
         delete(lists[0])
         delete(lists[1])
-        #movie list
+        delete(lists[2])
         #nick nameslist
         save(actors, 'actors.set')
         save(actresses, 'actresses.set')
-
+        save(movies, 'movies.set')
+    ##possibly get dictionary objects for both years json objects
     print "Pre-ceremony processing complete."
     return
 
@@ -349,6 +367,7 @@ def onLoad():
     max_tokens = 4; #Max number of tokens in a name i.e. Robert De Niro has 3 
     actors_set = load('actors.set')
     actresses_set = load('actresses.set')
+    movies_set = load('movies.set')
 
 
 def main():
@@ -361,11 +380,17 @@ def main():
     print 'Loading Lists'
     onLoad()
     print 'Lists Loaded'
-    # print get_hosts(2013)
-    # tweets = get_tweets_for_year(2015)
-    x = get_hosts(2015)
-    print 'done'
+    # x = get_hosts(2015)
+    tweets = get_tweets_for_year(2015)
+    # get_winners_dictionary(tweets)
+    # get_nominees_dictionary(tweets)
+    # (([A-Z]|[0-9])(\w|[\'\-\.\:\,\/\*\!\?])*)
+    # get_presenters_dictionary(tweets)
+    for tweet in tweets:
+        x= get_movie_names(tweet,movies_set)
+        print x
 
+    
 
 if __name__ == '__main__':
     pre_ceremony()
