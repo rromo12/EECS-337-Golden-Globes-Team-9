@@ -66,17 +66,19 @@ def get_people_names(tweet,nameset):
                 names.append(string)
     return names
 
-def get_movie_names(tweet,movieset):
+def get_movie_tv_names(tweet):
     #get ngrams in tweet, compare them to list of actors and actressss 
     # Need to fix 
     names= []
     tweetid = tweet[0]
     text = tweet[1]
     ####RegEX
-    possible_movie_names = set(re.findall('(((?:(?:(?:(?:[A-Z]|[0-9])((\w*)?([,:\'.!-/]*)?(:?\w*)?)?)|A|I)\s?)+)((?:(?:(?:&|(?:i|o)n|of|a(?:s|nd|n|t)?|(?:d|l)e|f?or|vs\.|to|by|la|the|with|du) )){1,2})?)+',text))
+    possible_movie_names = set(re.findall('(?:(?:(?:(?:(?:(?:[A-Z]|[0-9])(?:(?:\w*)?(?:[,:\'.!-/]*)?(?::?\w*)?)?)|A|I)\s?)+)(?:(?:(?:(?:&|(?:i|o)n|of|a(?:s|nd|n|t)?|(?:d|l)e|f?or|vs\.|to|by|la|the|with|du) )){1,2})?)+',text))
+    #############Stop List Really Needed
+    stoplist = ['Golden Globes','The','I','Can','Best']
     for string in possible_movie_names:
-            if(string in movieset):
-                names.append(string)
+        if(string.strip() in movies_set):
+                names.append(string.strip())
     return names
 
 ##Tweet Filtering Functions       
@@ -326,7 +328,7 @@ def Make_IMDB_People_List(f):
 
 def Make_IMDB_Movie_List(f):
     c  = open(f,'rb').read()
-    exp = re.compile('(.*)\([0-9]*\)',re.M)
+    exp = re.compile('(.*)\s\([0-9?]*\)',re.M)
     List = re.findall(exp, c)
     List =set(List)
     return List
@@ -381,14 +383,19 @@ def main():
     onLoad()
     print 'Lists Loaded'
     # x = get_hosts(2015)
-    tweets = get_tweets_for_year(2015)
+    tweets = get_tweets_for_year(2013)
+    for tweet in tweets:
+        x = get_movie_names(tweet)
+        print x
     # get_winners_dictionary(tweets)
     # get_nominees_dictionary(tweets)
     # (([A-Z]|[0-9])(\w|[\'\-\.\:\,\/\*\!\?])*)
     # get_presenters_dictionary(tweets)
-    for tweet in tweets:
-        x= get_movie_names(tweet,movies_set)
-        print x
+    tweet = ['3232', 'Iron Man was the best movie of all time Robert Downey Jr. is Awesome!']
+    x= get_movie_tv_names(tweet)
+    print x
+    if('Iron Man' in movies_set):
+        print True
 
     
 
