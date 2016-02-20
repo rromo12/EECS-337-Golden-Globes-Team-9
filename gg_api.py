@@ -395,10 +395,10 @@ def matching_main():
     print "DONE"
 
     #print 'Awards Dirctionary:\n'
-    #for x in matching_awards_dict:
+    #for x in awards_set:
     #    print (x)
-    #    for y in matching_awards_dict[x]:
-    #        print (y,':',matching_awards_dict[x][y])
+    #    for y in awards_set[x]:
+    #        print (y,':',awards_set[x][y])
     #print '\n---------------------------------\n\n'
     
     #print 'Winners Dirctionary:\n'
