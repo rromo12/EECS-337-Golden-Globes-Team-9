@@ -11,7 +11,8 @@ from collections import defaultdict
 # from fuzzywuzzy import process, fuzz
 
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
-
+# https://en.wikipedia.org/wiki/Most_common_words_in_Englis
+stoplist = set(['Netflix','Congrats','Congratulations','Congratulations!','Did','Too','TV','Movie','Golden Globes','The','I','Can','Best','So','That','You','Twitter','Golden','What','Why','Who','Best','She','He','They','Hollywood','This','And','Or','Be','To','Of','A','In','That','Have','I','It','For','Not','On','With','He','As','You','Do','At','What','Their','There','Would','All','One','My','Will','An','Or','She','Her','Say','We','They','From','By','His','But','This','So','Up','Out','If','About','Who','Get','Which','Go','Me','When','Make','Can','Like','Time','No','Just','Him','Know','Take','People','Into','Year','Your','Good','Some','Could','Them','See','Other','Than','Then','Now','Look','Only','Come','Its','Over','Think','Also','Back','After','Use','Two','How','Our','Work','First','Well','Way','Even','New','Want','Because','Any','These','Give','Day','Most','Us'])
 
 def get_tweets_for_year(year):
     tweets = []
@@ -74,11 +75,11 @@ def get_movie_tv_names(tweet):
     text = tweet[1]
     ####RegEX
     possible_movie_names = set(re.findall('(?:(?:(?:(?:(?:(?:[A-Z]|[0-9])(?:(?:\w*)?(?:[,:\'.!-/]*)?(?::?\w*)?)?)|A|I)\s?)+)(?:(?:(?:(?:&|(?:i|o)n|of|a(?:s|nd|n|t)?|(?:d|l)e|f?or|vs\.|to|by|la|the|with|du) )){1,2})?)+',text))
-    #############Stop List Really Needed
-    stoplist = ['Golden Globes','The','I','Can','Best']
+    #Not working that great
     for string in possible_movie_names:
-        if(string.strip() in movies_set):
-                names.append(string.strip())
+        string = string.strip()
+        if((string in movies_set) and  string not in stoplist):
+                names.append(string)
     return names
 
 ##Tweet Filtering Functions       
@@ -383,19 +384,17 @@ def main():
     onLoad()
     print 'Lists Loaded'
     # x = get_hosts(2015)
-    tweets = get_tweets_for_year(2013)
+    y=[]
+    tweets = get_tweets_for_year(2015)
     for tweet in tweets:
-        x = get_movie_names(tweet)
-        print x
+        y.extend(get_movie_tv_names(tweet))
+
+    print Counter(y).most_common(100)
+        
     # get_winners_dictionary(tweets)
     # get_nominees_dictionary(tweets)
     # (([A-Z]|[0-9])(\w|[\'\-\.\:\,\/\*\!\?])*)
     # get_presenters_dictionary(tweets)
-    tweet = ['3232', 'Iron Man was the best movie of all time Robert Downey Jr. is Awesome!']
-    x= get_movie_tv_names(tweet)
-    print x
-    if('Iron Man' in movies_set):
-        print True
 
     
 
