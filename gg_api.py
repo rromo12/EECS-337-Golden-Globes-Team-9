@@ -8,7 +8,7 @@ import nltk
 import time
 from collections import Counter
 from collections import defaultdict
-# from fuzzywuzzy import process, fuzz
+from fuzzywuzzy import process, fuzz
 
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 # https://en.wikipedia.org/wiki/Most_common_words_in_Englis
@@ -359,6 +359,14 @@ def pre_ceremony():
         save(actors, 'actors.set')
         save(actresses, 'actresses.set')
         save(movies, 'movies.set')
+
+
+
+    if not((os.path.isfile("converted_awards.set"))):
+        tweets = get_tweets_for_year(2015)
+        awards = award_names(tweets)
+        matching_awards_dict = convert_awards_to_given_names(awards)
+        save(matching_awards_dict, "converted_awards.set")
     ##possibly get dictionary objects for both years json objects
     print "Pre-ceremony processing complete."
     return
@@ -371,6 +379,7 @@ def onLoad():
     actors_set = load('actors.set')
     actresses_set = load('actresses.set')
     movies_set = load('movies.set')
+    awards_set = load('converted_awards.set')
     #######Optionally create dictionaries on load
     # tweets2015 = get_tweets_for_year(2015)
     # winners_2015  = get_winners_dictionary(tweets2015)
@@ -380,6 +389,33 @@ def onLoad():
     # winners_2013  = get_winners_dictionary(tweets2013)
     # nominees_2013 = get_nominees_dictionary(tweets2013)
     # presenters_2013 = get_presenters_dictionary(tweets2013)
+
+def matching_main():
+
+    print "DONE"
+
+    #print 'Awards Dirctionary:\n'
+    #for x in matching_awards_dict:
+    #    print (x)
+    #    for y in matching_awards_dict[x]:
+    #        print (y,':',matching_awards_dict[x][y])
+    #print '\n---------------------------------\n\n'
+    
+    #print 'Winners Dirctionary:\n'
+    #winners_dict = get_winners_dictionary(tweets)
+    #for x in winners_dict:
+    #    print (x)
+    #    for y in winners_dict[x]:
+    #        print (y,':',winners_dict[x][y])
+    #print '\n---------------------------------\n\n'
+
+    #print 'Nominees Dictionary:\n'
+    #print get_nominees_dictionary(tweets)
+    #print '\n\n\n'
+
+    #print 'Presenters Dictionary:\n'
+    #print get_presenters_dictionary(tweets)
+    #print '\n\n\n'
 
 def main():
     '''This function calls your program. Typing "python gg_api.py"
@@ -391,13 +427,10 @@ def main():
     print 'Loading Lists'
     onLoad()
     print 'Lists Loaded'
-    x = get_hosts(2015)
-    
-    # get_winners_dictionary(tweets)
-    # get_nominees_dictionary(tweets)
-    # get_presenters_dictionary(tweets)
+    #x = get_hosts(2015)
 
-    
+    matching_main()
+
 
 if __name__ == '__main__':
     pre_ceremony()
