@@ -194,27 +194,6 @@ def convert_awards_to_given_names(found_awards):
 
 
 
-#Tweet contains match for award and nomineee ---> add to lists
-#dictionary Hosts: {key:value} = tweetid: hostname 
-#dictionary Award Names: {key:value} = tweetid: awardname 
-#dictionary Nominees: {key:value} = tweetid: nominees 
-# d_winners{};
-# d_nominee{};
-# d_award{};
-
-#d_winners_nominee{};
-# d_nominee_award{};
-# d_winner_award{};
-
-def match_IDs(d_winners, d_nominee, d_award):
-    for key_a, value_a in d_award:
-        for key_n, value_n in d_nominee:
-            if key_n == key_a:
-                d_nominee_award[value_n] = value_a;
-        for key_w, value_w in d_winners:
-            if key_w == key_a:
-                d_winner_award[value_w] = value_w;
-
 def get_hosts(year):
     '''Hosts is a list of one or more strings. Do NOT change the name
     of this function or what it returns.'''
@@ -377,27 +356,37 @@ def pre_ceremony():
         winners = get_winners_dictionary(tweets)
         save(winners, "2015winners.set")
 
-        awards = award_names(tweets)
-        matching_awards_dict = convert_awards_to_given_names(awards)
-        save(matching_awards_dict, "converted_awards.set")
+        #awards = award_names(tweets) #remember to uncomment - roshun self note
+        #matching_awards_dict = convert_awards_to_given_names(awards)
+        #save(matching_awards_dict, "converted_awards.set")
     ##possibly get dictionary objects for both years json objects
+    if not((os.path.isfile('nominees.set'))):
+        actors_set = load('actors.set')
+        movies_set = load('movies.set')
+        actresses_set = load('actresses.set')
+
+        noms = get_nominees_dictionary(load("2015tweets.set"))
+        save(noms, "nominees.set")
+
     print "Pre-ceremony processing complete."
     return
 
 def onLoad():
     '''if we get a gui stuff to do before it shows'''
+    global actors_set,actresses_set,movies_set,max_tokens,tweets2015,tweets2013,awards_set, winners_2015
     # load sets 
     max_tokens = 4; #Max number of tokens in a name i.e. Robert De Niro has 3 
-    #actors_set = load('actors.set')
-    #actresses_set = load('actresses.set')
-    #movies_set = load('movies.set')
-    global awards_set_main, winners_2015_main
+    actors_set = load('actors.set')
+    actresses_set = load('actresses.set')
+    movies_set = load('movies.set')
+
+    global awards_set_main, winners_2015_main, tweets2015_main, nominees_2015_main
     awards_set_main = load('converted_awards.set')
 
     #######Optionally create dictionaries on load
-   #tweets2015 = load('2015tweets.set')
+    tweets2015_main = load('2015tweets.set')
     winners_2015_main  = load('2015winners.set')
-    # nominees_2015 = get_nominees_dictionary(tweets2015)
+    nominees_2015_main = load('nominees.set')
     # presenters_2015 = get_presenters_dictionary(tweets2015)
     # tweets2013 = get_tweets_for_year(2013)
     # winners_2013  = get_winners_dictionary(tweets2013)
@@ -405,64 +394,74 @@ def onLoad():
     # presenters_2013 = get_presenters_dictionary(tweets2013)
 
 def matching_main():
+    #matching functions between awards, nominees, hosts, and winners
+    #currently works well for:
+        #foreign language film
+        #best original song - motion picture
+
+    #works poorly for:
+        #best motion picture - drama
+        #best animated feature film
 
     print "Initialize Awards\n"
 
+    #AWARDS VARIABLES
     d_winner_award = {}
     count_awards = 0
     count_wins = 0
 
-    print 'Awards Dictionary mapped to Winner Dictionary:\n'
+    cecil_award_lst = []
+    best_song_mP = []
+    best_foreign_lf = []
+    best_motion_P_Drama = []
+    best_animated_feature_film = []
+
+    #NOMINEES VARIABLES
+    d_nominee_award = {}
+    count_nominees = 0
 
     for key, value in awards_set_main.iteritems():
-        if count_awards >= 1000:
-            break
+        #if count_awards >= 10000:
+        #    break
         count_awards+=1
-        count_wins+=1
+
+        #print 'Awards Dictionary mapped to Nominees Dictionary:\n'
+        for key2, value2 in nominees_2015_main.iteritems():
+            count_nominees+=1
+            if key2 == key:
+                d_nominee_award[key] = "Award: " + str(value) + " Winner: " + str(value2)
+                print d_nominee_award[key]
+
+
+        #print 'Awards Dictionary mapped to Winner Dictionary:\n'
         for key2, value2 in winners_2015_main.iteritems():
-            if count_wins >= 1000:
-                break
+            count_wins+=1
+            #if count_wins >= 10000:
+            #    break
             #print key2, key
             if key2 == key:
                 d_winner_award[key] = "Award: " + str(value) + " Winner: " + str(value2)
-                print d_winner_award[key]
+                if value == 'best original song - motion picture':
+                    #print value2
+                    #print type(value2)
+                    #print d_winner_award[key] #works very well (john legend) -> perhaps set cutoff flag?
+                    best_song_mP.append(str(value2))
+                elif value == 'best foreign language film':
+                #    print d_winner_award[key]
+                    best_foreign_lf.append(str(value2))
+                elif value == 'best animated feature film':
+                #    print d_winner_award[key] #works poorly
+                    best_animated_feature_film.append(str(value2))
+
+                elif value == 'best motion picture - drama':
+                #    print d_winner_award[key]
+                    best_motion_P_Drama.append(str(value2))
+
     
-
-    #for key, value in winners_2015_main.iteritems():
-    #    if count_wins >= 100:
-    #        break
-        #print key, value
-        #count_wins+=1
-
-    #intersect = []
-    #for item in awards_set_main.keys():
-    #    if count_awards >= 100:
-    #        break
-    #    count_awards+=1
-    #    if winners_2015_main.has_key(item):
-    #        intersect.append(item)
-    #        print "Intersects: ", intersect, item
-
-    #for key, value in d_winner_award.iteritems():
-    #    print "Key: " + key + "  " + "Value: " + value + "\n"
+    mcommon_song = [ite for ite, it in Counter(best_song_mP).most_common(5)]    
+    print mcommon_song
 
     print '\n---------------------------------\n\n'
-    
-    #print 'Winners Dirctionary:\n'
-    #winners_dict = get_winners_dictionary(tweets)
-    #for x in winners_dict:
-    #    print (x)
-    #    for y in winners_dict[x]:
-    #        print (y,':',winners_dict[x][y])
-    #print '\n---------------------------------\n\n'
-
-    #print 'Nominees Dictionary:\n'
-    #print get_nominees_dictionary(tweets)
-    #print '\n\n\n'
-
-    #print 'Presenters Dictionary:\n'
-    #print get_presenters_dictionary(tweets)
-    #print '\n\n\n'
 
 def main():
     '''This function calls your program. Typing "python gg_api.py"
