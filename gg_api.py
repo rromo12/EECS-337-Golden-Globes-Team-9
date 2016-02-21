@@ -341,6 +341,8 @@ def pre_ceremony():
     Do NOT change the name of this function or what it returns.'''
     # Your code here
     #get IMDB Actor,Actress,Nicknames, and Movie List
+    global actors_set,actresses_set,movies_set,max_tokens,tweets2015,tweets2013,awards_set, winners_2015
+
     if not((os.path.isfile("actors.set")) and os.path.isfile("actresses.set") and os.path.isfile("movies.set")):
         urls = ['ftp://ftp.fu-berlin.de/pub/misc/movies/database/actors.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/actresses.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/aka-names.list.gz','ftp://ftp.fu-berlin.de/pub/misc/movies/database/movies.list.gz']
         for url in urls:
@@ -362,8 +364,17 @@ def pre_ceremony():
 
 
 
-    if not((os.path.isfile("converted_awards.set"))):
+    if not((os.path.isfile("converted_awards.set")) and os.path.isfile("2015tweets.set") and os.path.isfile("2015winners.set")):
         tweets = get_tweets_for_year(2015)
+        save(tweets, "2015tweets.set")
+
+        movies_set = load('movies.set')
+        awards_set = load('converted_awards.set')
+        actors_set = load('actors.set')
+        actresses_set = load('actresses.set') #needed for get_winners function, only done first time
+        winners = get_winners_dictionary(tweets)
+        save(winners, "2015winners.set")
+
         awards = award_names(tweets)
         matching_awards_dict = convert_awards_to_given_names(awards)
         save(matching_awards_dict, "converted_awards.set")
@@ -373,16 +384,17 @@ def pre_ceremony():
 
 def onLoad():
     '''if we get a gui stuff to do before it shows'''
-    global actors_set,actresses_set,movies_set,max_tokens,tweets2015,tweets2013
     # load sets 
     max_tokens = 4; #Max number of tokens in a name i.e. Robert De Niro has 3 
-    actors_set = load('actors.set')
-    actresses_set = load('actresses.set')
-    movies_set = load('movies.set')
-    awards_set = load('converted_awards.set')
+    #actors_set = load('actors.set')
+    #actresses_set = load('actresses.set')
+    #movies_set = load('movies.set')
+    global awards_set_main, winners_2015_main
+    awards_set_main = load('converted_awards.set')
+
     #######Optionally create dictionaries on load
-    # tweets2015 = get_tweets_for_year(2015)
-    # winners_2015  = get_winners_dictionary(tweets2015)
+   #tweets2015 = load('2015tweets.set')
+    winners_2015_main  = load('2015winners.set')
     # nominees_2015 = get_nominees_dictionary(tweets2015)
     # presenters_2015 = get_presenters_dictionary(tweets2015)
     # tweets2013 = get_tweets_for_year(2013)
@@ -392,14 +404,47 @@ def onLoad():
 
 def matching_main():
 
-    print "DONE"
+    print "Initialize Awards\n"
 
-    #print 'Awards Dirctionary:\n'
-    #for x in awards_set:
-    #    print (x)
-    #    for y in awards_set[x]:
-    #        print (y,':',awards_set[x][y])
-    #print '\n---------------------------------\n\n'
+    d_winner_award = {}
+    count_awards = 0
+    count_wins = 0
+
+    print 'Awards Dictionary mapped to Winner Dictionary:\n'
+
+    for key, value in awards_set_main.iteritems():
+        if count_awards >= 1000:
+            break
+        count_awards+=1
+        count_wins+=1
+        for key2, value2 in winners_2015_main.iteritems():
+            if count_wins >= 1000:
+                break
+            #print key2, key
+            if key2 == key:
+                d_winner_award[key] = "Award: " + str(value) + " Winner: " + str(value2)
+                print d_winner_award[key]
+    
+
+    #for key, value in winners_2015_main.iteritems():
+    #    if count_wins >= 100:
+    #        break
+        #print key, value
+        #count_wins+=1
+
+    #intersect = []
+    #for item in awards_set_main.keys():
+    #    if count_awards >= 100:
+    #        break
+    #    count_awards+=1
+    #    if winners_2015_main.has_key(item):
+    #        intersect.append(item)
+    #        print "Intersects: ", intersect, item
+
+    #for key, value in d_winner_award.iteritems():
+    #    print "Key: " + key + "  " + "Value: " + value + "\n"
+
+    print '\n---------------------------------\n\n'
     
     #print 'Winners Dirctionary:\n'
     #winners_dict = get_winners_dictionary(tweets)
