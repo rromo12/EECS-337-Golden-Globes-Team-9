@@ -329,7 +329,9 @@ def Make_IMDB_People_List(f):
 
 def Make_IMDB_Movie_List(f):
     c  = open(f,'rb').read()
-    exp = re.compile('(.*)\s\([0-9?]*\)',re.M)
+    # exp = re.compile('(.*)\s\([0-9?]*\)',re.M)
+    # TRY TO LIMIT IT TO MOVIES IN 2000'S
+    exp = re.compile('(.*)\s\(20[0-9][0-9?]\)',re.M)
     List = re.findall(exp, c)
     List =set(List)
     return List
