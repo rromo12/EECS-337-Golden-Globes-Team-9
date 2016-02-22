@@ -260,7 +260,7 @@ def get_nominees(year):
 
     return nominees
 
-def get_winners(year):
+def get_winner(year):
     '''Winners is a dictionary with the hard coded award
     names as keys, and each entry containing a single string.
     Do NOT change the name of this function or what it returns.'''
@@ -464,7 +464,7 @@ def pre_ceremony():
         actresses_set = load('actresses.set')
 
         noms = get_nominees_dictionary(load("2015tweets.set"))
-        save(noms, "2013nominees.set")
+        save(noms, "nominees.set")
 
     print "Pre-ceremony processing complete."
     return
@@ -478,21 +478,23 @@ def onLoad():
     actresses_set = load('actresses.set')
     movies_set = load('movies.set')
 
-    global awards_set_main, awards_set_main2013, winners_2015_main, tweets2015_main, nominees_2015_main, nominees_2013_main, winners_2013_main, presenters_2013_main
-    #awards_set_main = load('converted_awards.set')
+    global awards_set_main, awards_set_main2013, winners_2015_main, presenters_2015_main, tweets2015_main, nominees_2015_main, nominees_2013_main, winners_2013_main, presenters_2013_main
+    awards_set_main = load('converted_awards.set')
     awards_set_main2013 = load('converted_awards2013.set')
+
+    nominees_2015_main = load('nominees.set')
+    nominees_2013_main = load('2013nominees.set')
+
+    presenters_2015_main = load('presenters.set')
+    presenters_2013_main = load('2013presenters.set')
+
+    winners_2015_main  = load('2015winners.set')
+    winners_2013_main = load('2013winners.set')
 
     #######Optionally create dictionaries on load
     #tweets2015_main = load('2015tweets.set')
-    #winners_2015_main  = load('2015winners.set')
-    #nominees_2015_main = load('nominees.set')
-    nominees_2013_main = load('2013nominees.set')
     #presenters_2015 = get_presenters_dictionary(tweets2015_main)
-    winners_2013_main = load('2013winners.set')
-    # tweets2013 = get_tweets_for_year(2013)
-    # winners_2013  = get_winners_dictionary(tweets2013)
-    # nominees_2013 = get_nominees_dictionary(tweets2013)
-    presenters_2013_main = load('2013presenters.set')
+    #tweets2013 = load('2013tweets.set')
 
 def main():
     '''This function calls your program. Typing "python gg_api.py"
@@ -507,7 +509,6 @@ def main():
     #x = get_hosts(2015)
 
     #matching_main()
-    print get_presenters(2013)
 
 
 if __name__ == '__main__':
