@@ -317,6 +317,31 @@ def get_presenters(year):
     # Your code here
     return presenters
 
+def get_most_discussed(year):
+    #fun goal to get most popular person
+    #these are usually from the list of nominees so we will use it
+    #takes in year and returns list of 3 most discussed people
+
+    most_popular = []
+    ret_list = []
+
+    if year == 2013:
+        for key, value in nominees_2013_main.iteritems():
+            most_popular.append(value)
+
+    if year == 2015:
+        for key, value in nominees_2015_main.iteritems():
+            most_popular.append(value)
+
+    for word in most_popular:
+        try:
+            ret_list.index(word)[1] += 1
+        except:
+            ret_list.append([word,0])
+
+    return ret_list
+
+
 def download(url):
     '''http://stackoverflow.com/questions/22676/how-do-i-download-a-file-over-http-using-python
     '''
@@ -509,6 +534,52 @@ def main():
     #x = get_hosts(2015)
 
     #matching_main()
+
+    inputflag = 1
+
+    while(inputflag == 1):
+
+        print "Type 'gethosts' to display hosts"
+        print "Type 'awards' to display award names"
+        print "Type 'nominees' to display nominees mapped to awards"
+        print "Type 'winners' to display winners mapped to awards"
+        print "Type 'presenters' to display presenters mapped to awards"
+        print "Type 'popular' to display top 3 most discussed people"
+
+        var = raw_input("Please enter something from the above: ")
+
+        if var == 'gethosts':
+            year = raw_input("Please enter either 2013 or 2015: ")
+            print get_hosts(int(year))
+
+        if var == 'awards':
+            year = raw_input("Please enter either 2013 or 2015: ")
+            print get_awards(int(year))
+
+        if var == 'nominees':
+            year = raw_input("Please enter either 2013 or 2015: ")
+            print get_nominees(int(year))
+
+        if var == 'winners':
+            year = raw_input("Please enter either 2013 or 2015: ")
+            print get_winner(int(year))
+
+        if var == 'presenters':
+            year = raw_input("Please enter either 2013 or 2015: ")
+            print get_presenters(int(year))
+
+        if var == 'popular':
+            year = raw_input("Please enter either 2013 or 2015: ")
+            print get_most_discussed(int(year))
+
+        cont = raw_input("Do you want to continue y/n(Enter y or n lowercase): ")
+
+        if cont == 'y':
+            continue
+        if cont == 'n':
+            print "Terminated"
+            inputflag -= 1
+            break
 
 
 if __name__ == '__main__':
