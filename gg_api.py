@@ -155,6 +155,10 @@ def make_dictionary(function,tweets):
                 dictionary[tweetid].extend(get_people_names(tweet,actresses_set))
         if(get_movie_tv_names(tweet)!=[]):
                 dictionary[tweetid].extend(get_movie_tv_names(tweet))
+    ##eliminate duplicates in tweets
+    for tweetid, name_list in dictionary.iteritems():
+        dictionary[tweetid] = list(set(dictionary[tweetid]))
+
     return dictionary
 
 def get_winners_dictionary(tweets):
