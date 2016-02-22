@@ -547,7 +547,7 @@ def main():
         print "Type 'nominees' to display nominees mapped to awards"
         print "Type 'winners' to display winners mapped to awards"
         print "Type 'presenters' to display presenters mapped to awards"
-        print "Type 'popular' to display top 3 most discussed people"
+        print "Type 'popular' to display frequency of people / movies discussed"
 
         var = raw_input("Please enter something from the above: ")
 
