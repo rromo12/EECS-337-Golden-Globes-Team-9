@@ -158,7 +158,6 @@ def make_dictionary(function,tweets):
     ##eliminate duplicates in tweets
     for tweetid, name_list in dictionary.iteritems():
         dictionary[tweetid] = list(set(dictionary[tweetid]))
-
     return dictionary
 
 def get_winners_dictionary(tweets):
